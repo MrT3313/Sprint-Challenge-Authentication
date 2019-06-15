@@ -5,8 +5,12 @@ const { authenticate } = require('../auth/authenticate');
 // KNEX DB
   const DB_KNEX = require('../database/dbConfig.js')
 
+// MIDDLEWARE
+  const pwHash = require('../api/middleware/pwHash.js')
+  
+
 module.exports = server => {
-  server.post('/api/register', register);
+  server.post('/api/register', pwHash, register);
   server.post('/api/login', login);
   server.get('/api/jokes', authenticate, getJokes);
 };
