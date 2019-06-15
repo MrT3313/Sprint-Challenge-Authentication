@@ -1,4 +1,6 @@
 const axios = require('axios');
+const bcrypt = require('bcryptjs')
+const jwt = require('jsonwebtoken')
 
 const { authenticate } = require('../auth/authenticate');
 
@@ -7,6 +9,10 @@ const { authenticate } = require('../auth/authenticate');
 
 // MIDDLEWARE
   const pwHash = require('../api/middleware/pwHash.js')
+
+// SECRETS
+  const secrets = require('../secrets.js')
+  
   
 
 module.exports = server => {
@@ -29,18 +35,60 @@ async function register(req, res) {
     .insert(req.body)
     .then( result => {
       console.log('result', result )
-      
       res.status(200).json( result )
-
     })
     .catch( err => {
       res.status(500).json( { error: 'Unable to register new user'} )
     })
 }
 
-function login(req, res) {
+async function login(req, res) {
   // implement user login
   console.log('loginRouter POST/')
+
+  const { username, password } = req.body
+    console.log('username, password', username, password)
+  
+  DB_KNEX('users')
+    .where('username', username)
+    .first()
+      .then( user => {
+        console.log('user', user )
+        
+        const pwVerification = bcrypt.compareSync(password, user.password)
+        console.log('pwVerification', pwVerification)
+
+        if (user && pwVerification) {
+          console.log('secrets', secrets)
+          console.log('secrets.jwtSecret', secrets.jwtSecret)
+
+          const token = jwt.sign(
+            {
+              userID: user.id,
+              userName: user.username
+            },
+            secrets.jwtSecret,
+            {
+              expiresIn: "2h"
+            }
+          )
+          console.log('token', token)
+
+          res.status(200).json({
+              message: `Welcome ${username}`, 
+              user: user.id,
+              token,
+          })
+        } else {
+          res.status(401).json( { error: 'Unabel to Login'} )
+        }
+
+      })
+      .catch( err => {
+        res.status(500).json( { error: 'Unable to Login'} )
+      })
+    
+
 }
 
 function getJokes(req, res) {
