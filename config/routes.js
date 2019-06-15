@@ -92,6 +92,7 @@ async function login(req, res) {
 }
 
 function getJokes(req, res) {
+  console.log('getJokesRouter POST/')
   const requestOptions = {
     headers: { accept: 'application/json' },
   };
