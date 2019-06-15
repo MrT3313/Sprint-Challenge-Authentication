@@ -2,18 +2,41 @@ const axios = require('axios');
 
 const { authenticate } = require('../auth/authenticate');
 
+// KNEX DB
+  const DB_KNEX = require('../database/dbConfig.js')
+
 module.exports = server => {
   server.post('/api/register', register);
   server.post('/api/login', login);
   server.get('/api/jokes', authenticate, getJokes);
 };
 
-function register(req, res) {
-  // implement user registration
+async function register(req, res) {
+  /* Accepted Shape 
+    {
+      "username": "STRING",
+      "password": "STRING"
+    }
+  */
+  console.log('registerRouter POST/')
+  console.log(req.body)
+
+  DB_KNEX('users')
+    .insert(req.body)
+    .then( result => {
+      console.log('result', result )
+      
+      res.status(200).json( result )
+
+    })
+    .catch( err => {
+      res.status(500).json( { error: 'Unable to register new user'} )
+    })
 }
 
 function login(req, res) {
   // implement user login
+  console.log('loginRouter POST/')
 }
 
 function getJokes(req, res) {
