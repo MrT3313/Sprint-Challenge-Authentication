@@ -10,6 +10,7 @@ module.exports = server => {
 
 function register(req, res) {
   // implement user registration
+
 }
 
 function login(req, res) {
